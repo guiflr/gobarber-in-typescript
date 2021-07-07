@@ -4,6 +4,8 @@ import { sign, verify } from 'jsonwebtoken'
 
 import { User } from "../models/User";
 
+import {AppError} from '../errors/AppError'
+
 interface Request {
   email: string;
   password: string;
@@ -21,13 +23,13 @@ class CreateSessionService {
     const user = await userRepo.findOne({ where: { email } });
 
     if (!user) {
-      throw new Error("Email/password has not found");
+      throw new AppError("Email/password was not found");
     }
 
     const passwordMath = await bcrypt.compare(password, user.password);
 
     if (!passwordMath) {
-      throw new Error("Email/password has not found");
+      throw new AppError("Email/password was not found");
     }
 
     const token = sign({}, 'amanhaeuvousersenior', { subject: user.id, expiresIn: '1d' })

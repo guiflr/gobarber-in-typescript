@@ -3,6 +3,8 @@ import { verify } from "jsonwebtoken";
 
 import { auth } from "../config/auth";
 
+import { AppError } from "../errors/AppError";
+
 interface TokenPayload {
   sub: string;
   exp: number;
@@ -16,13 +18,13 @@ export function authMiddleware(
   const bearer = request.headers.authorization;
 
   if (!bearer) {
-    throw new Error("Token not provider");
+    throw new AppError("Token not provider", 401);
   }
 
   const [, token] = bearer.split(" ");
-  
+
   if (token === "undefined") {
-    throw new Error("Token not provider");
+    throw new AppError("Token not provider", 401);
   }
 
   try {
@@ -35,6 +37,6 @@ export function authMiddleware(
     };
     next();
   } catch {
-    throw new Error("Token is not valid");
+    throw new AppError("Token is not valid", 401);
   }
 }

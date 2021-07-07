@@ -1,9 +1,10 @@
-import { request, Router } from "express";
+import { Router } from "express";
 import multer from "multer";
 
 import { CreateUserService } from "../../services/CreateUserService";
 import uploadConfig from "../../config/upload";
 import { authMiddleware } from "../../middlewares/authMiddleware";
+import { UpdateUserAvatarService } from "../../services/UpdateUserAvatarService";
 
 const userRouter = Router();
 
@@ -14,25 +15,28 @@ userRouter.get("/", async (request, response) => {
 });
 
 userRouter.post("/", async (request, response) => {
-  try {
-    const { email, name, password } = request.body;
+  const { email, name, password } = request.body;
 
-    const createUserService = new CreateUserService();
+  const createUserService = new CreateUserService();
 
-    const user = await createUserService.execute({ name, email, password });
+  const user = await createUserService.execute({ name, email, password });
 
-    return response.status(201).json(user);
-  } catch (err) {
-    return response.status(400).json({ error: err.message });
-  }
+  return response.status(201).json(user);
 });
 
 userRouter.patch(
-  "/avatar",
+  "/avatar/",
   authMiddleware,
   upload.single("avatar"),
-  (request, response) => {
-    return response.json(request.file);
+  async (request, response) => {
+    const userAvatarService = new UpdateUserAvatarService();
+
+    const user = await userAvatarService.execute({
+      userId: request.user.id,
+      fileName: request.file?.filename,
+    });
+
+    return response.status(200).json(user);
   }
 );
 
